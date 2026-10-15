@@ -1,0 +1,55 @@
+# Compiled Go binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+build/
+tmp/
+main
+api
+school-management-system
+
+# Test binary, built with `go test -c`
+*.test
+
+# Code coverage profiles and benchmarks
+*.out
+coverage.txt
+*.prof
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Environment variables and secrets (CRITICAL: never commit DB credentials or JWT keys)
+.env
+.env.*
+!.env.example
+
+# Certificate and key files
+*.pem
+*.key
+*.crt
+
+# Database dumps and local backups
+*.sql.gz
+*.dump
+*.db
+postgres-data/
+
+# IDE and Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Live-reload tool temporary folders (if using Air)
+.air.toml.tmp
