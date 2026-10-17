@@ -7,7 +7,7 @@ import (
 	"rest-api/internal/repository"
 )
 
-func StudentSignupHandler(r *repository.RepoUser) http.HandleFunc {
+func StudentSignupHandler(repo *repository.RepoUser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.RegisterStudentRequest
 		err := json.NewDecoder(r.Body).Decode(&user)
@@ -25,7 +25,8 @@ func StudentSignupHandler(r *repository.RepoUser) http.HandleFunc {
 			http.Error(w, "data is invalid", http.StatusBadRequest)
 			return
 		}
-		
+
+		id, err := repo.DbCreateStudent(r.Context(), user.Username, user.FullName, user.Password, user.Class, user.EnrollmentNo)
 
 	}
 }
