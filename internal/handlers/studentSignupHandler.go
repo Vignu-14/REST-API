@@ -16,6 +16,16 @@ func StudentSignupHandler(r *repository.RepoUser) http.HandleFunc {
 			return
 		}
 
+		if len(user.Password) > 20 {
+			http.Error(w, "password should lesser than 21 characters", http.StatusBadRequest)
+			return
+		}
+
+		if user.Username == "" || user.Email == "" || user.FullName == "" || user.Password == "" || user.Class == "" || user.EnrollmentNo == ""{
+			http.Error(w, "data is invalid", http.StatusBadRequest)
+			return
+		}
+		
 
 	}
 }
