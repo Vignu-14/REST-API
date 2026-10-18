@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rest-api/internal/models"
-	"rest-api/internal/repository"
+	"rest-api/internal/repository" 
 )  
 
 func StudentSignupHandler(repo *repository.RepoUser) http.HandlerFunc {
