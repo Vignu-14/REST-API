@@ -138,7 +138,7 @@ func (t *teacherRepo) GetAll(ctx context.Context) ([]models.TeacherProfile, erro
 		ORDER BY t.class ASC, u.full_name ASC
 	`
 
-	rows, err := r.db.Query(ctx, query)
+	rows, err := t.db.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query all teachers: %w", err)
 	}
