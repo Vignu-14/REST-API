@@ -1,28 +1,41 @@
 package models
 
-import "github.com/google/uuid"
+import "time"
 
-// Teacher is the raw database model for `teachers` table
+// Teacher represents a row in the 'teachers' table
 type Teacher struct {
-	ID      uuid.UUID `json:"id" db:"id"`
-	UserID  uuid.UUID `json:"user_id" db:"user_id"`
-	Class   string    `json:"class" db:"class"`
-	Subject string    `json:"subject" db:"subject"`
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Class     string    `json:"class"`
+	Subject   string    `json:"subject"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-// TeacherProfileResponse embeds UserResponse
-type TeacherProfileResponse struct {
-	UserResponse
-	Class   string `json:"class"`
-	Subject string `json:"subject"`
+// TeacherRegisterRequest is the JSON body for POST /teachers/register
+type TeacherRegisterRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	FullName string `json:"full_name"`
+	Password string `json:"password"`
+	Class    string `json:"class"`
+	Subject  string `json:"subject"`
 }
 
-// CreateTeacherRequest is the incoming payload from an executive
-type CreateTeacherRequest struct {
-	Username string `json:"username" binding:"required,min=3"`
-	Email    string `json:"email" binding:"required,email"`
-	FullName string `json:"full_name" binding:"required"`
-	Password string `json:"password" binding:"required,min=8"`
-	Class    string `json:"class" binding:"required"`
-	Subject  string `json:"subject" binding:"required"`
+// UpdateTeacherRequest is the JSON body for PUT/PATCH /teachers/me
+type UpdateTeacherRequest struct {
+	FullName string `json:"full_name"`
+	Class    string `json:"class"`
+	Subject  string `json:"subject"`
+}
+
+// TeacherProfile combines 'users' + 'teachers' for GET responses
+type TeacherProfile struct {
+	UserID    string    `json:"user_id"`
+	TeacherID string    `json:"teacher_id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	FullName  string    `json:"full_name"`
+	Class     string    `json:"class"`
+	Subject   string    `json:"subject"`
+	CreatedAt time.Time `json:"created_at"`
 }

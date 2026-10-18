@@ -2,19 +2,15 @@ package repository
 
 import (
 	"context"
-	"errors"
-
-	"github.com/jackc/pgx/v5/pgxpool"
+	"rest-api/internal/models"
 )
 
-type RepoUser struct {
-	pool *pgxpool.Pool
-}
-
-func NewRepoUser(pool *pgxpool.Pool) *RepoUser {
-	return &RepoUser{pool: pool}
-}
-
-func (repo RepoUser) DbCreateStudent(ctx context.Context, username, email, fullname, password, class, enroll_no string) (int, error) {
-	return 0, errors.New("")
+type StudentRepository interface {
+	Create(ctx context.Context, user *models.User, student *models.Student) error
+	GetByUserID(ctx context.Context, userID string) (*models.StudentProfile, error)
+	Update(ctx context.Context, userID string, req *models.UpdateStudentRequest) error
+	Delete(ctx context.Context, userID string) error
+	// Used by Teachers (their class) and Executives (all classes)
+	GetByClass(ctx context.Context, class string) ([]models.StudentProfile, error)
+	GetAll(ctx context.Context) ([]models.StudentProfile, error)
 }

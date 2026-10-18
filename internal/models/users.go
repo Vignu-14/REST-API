@@ -1,10 +1,6 @@
 package models
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
+import "time"
 
 type Role string
 
@@ -14,31 +10,27 @@ const (
 	RoleExecutive Role = "executive"
 )
 
-// User is the raw database model for the `users` table
+// User represents a row in the 'users' table
 type User struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	Username     string    `json:"username" db:"username"`
-	Email        string    `json:"email" db:"email"`
-	FullName     string    `json:"full_name" db:"full_name"`
-	PasswordHash string    `json:"-" db:"password_hash"`
-	Role         Role      `json:"role" db:"role"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	ID           string    `json:"id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	FullName     string    `json:"full_name"`
+	PasswordHash string    `json:"-"` // "-" ensures password hash is NEVER sent in JSON responses
+	Role         Role      `json:"role"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-// UserResponse is the safe public identity (no password)
-// Other structs will EMBED this to avoid repeating fields
-type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	FullName  string    `json:"full_name"`
-	Role      Role      `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-// LoginRequest is shared across everyone
+// LoginRequest allows login via either username or email
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Identifier string `json:"identifier"` // User can type their username OR email here
+	Password   string `json:"password"`
+}
+
+// LoginResponse returns the JWT token and basic user info
+type LoginResponse struct {
+	Token string `json:"token"`
+	Role  Role   `json:"role"`
+	ID    string `json:"user_id"`
 }

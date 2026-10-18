@@ -1,26 +1,37 @@
 package models
 
-import "github.com/google/uuid"
+import "time"
 
-// Executive is the raw database model for the `executives` table
+// Executive represents a row in the 'executives' table
 type Executive struct {
-	ID         uuid.UUID `json:"id" db:"id"`
-	UserID     uuid.UUID `json:"user_id" db:"user_id"`
-	Department string    `json:"department" db:"department"`
+	ID         string    `json:"id"`
+	UserID     string    `json:"user_id"`
+	Department string    `json:"department"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
-// ExecutiveProfileResponse embeds UserResponse automatically
-// Keeps the JSON response flat with all base identity fields included
-type ExecutiveProfileResponse struct {
-	UserResponse
+// ExecutiveRegisterRequest is the JSON body for POST /executives/register
+type ExecutiveRegisterRequest struct {
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	FullName   string `json:"full_name"`
+	Password   string `json:"password"`
 	Department string `json:"department"`
 }
 
-// CreateExecutiveRequest is used when bootstrapping or creating admin accounts
-type CreateExecutiveRequest struct {
-	Username   string `json:"username" binding:"required,min=3"`
-	Email      string `json:"email" binding:"required,email"`
-	FullName   string `json:"full_name" binding:"required"`
-	Password   string `json:"password" binding:"required,min=8"`
-	Department string `json:"department" binding:"required"`
+// UpdateExecutiveRequest is the JSON body for PUT/PATCH /executives/me
+type UpdateExecutiveRequest struct {
+	FullName   string `json:"full_name"`
+	Department string `json:"department"`
+}
+
+// ExecutiveProfile combines 'users' + 'executives' for GET responses
+type ExecutiveProfile struct {
+	UserID      string    `json:"user_id"`
+	ExecutiveID string    `json:"executive_id"`
+	Username    string    `json:"username"`
+	Email       string    `json:"email"`
+	FullName    string    `json:"full_name"`
+	Department  string    `json:"department"`
+	CreatedAt   time.Time `json:"created_at"`
 }

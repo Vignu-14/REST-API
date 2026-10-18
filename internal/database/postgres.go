@@ -3,14 +3,24 @@ package database
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func ConnectPostgres(ctx context.Context, DbUrl string) (*pgxpool.Pool, error) {
-	Pool, err := pgxpool.New(ctx, DbUrl)
+func ConnectPostgres(DbUrl string) (*pgxpool.Pool, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 10)
+	defer cancel()
+
+	pool, err := pgxpool.New(ctx, DbUrl)
 	if err != nil {
-		return nil, errors.New("failed to connect to database")
+		return nil, fmt.Errorf("unable to create connection pool: %w", err)
 	}
-	return Pool, nil
+
+	if err := pool.Ping(ctx); err != nil{
+		return nil, fmt.Errorf("unable to ping the database: %w", err)
+	}
+	return pool, nil
 }

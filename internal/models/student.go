@@ -1,29 +1,41 @@
 package models
 
-import "github.com/google/uuid"
+import "time"
 
-// Student is the raw database model for `students` table
+// Student represents a row in the 'students' table
 type Student struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	UserID       uuid.UUID `json:"user_id" db:"user_id"`
-	Class        string    `json:"class" db:"class"`
-	EnrollmentNo string    `json:"enrollment_no" db:"enrollment_no"`
+	ID           string    `json:"id"`
+	UserID       string    `json:"user_id"`
+	Class        string    `json:"class"`
+	EnrollmentNo string    `json:"enrollment_no"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
-// StudentProfileResponse embeds UserResponse automatically
-// When converted to JSON, all UserResponse fields appear at top level
-type StudentProfileResponse struct {
-	UserResponse
+// StudentRegisterRequest is the JSON body for POST /students/register
+type StudentRegisterRequest struct {
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	FullName     string `json:"full_name"`
+	Password     string `json:"password"`
 	Class        string `json:"class"`
 	EnrollmentNo string `json:"enrollment_no"`
 }
 
-// RegisterStudentRequest is the incoming payload
-type RegisterStudentRequest struct {
-	Username     string `json:"username" binding:"required,min=3"`
-	Email        string `json:"email" binding:"required,email"`
-	FullName     string `json:"full_name" binding:"required"`
-	Password     string `json:"password" binding:"required,min=8"`
-	Class        string `json:"class" binding:"required"`
-	EnrollmentNo string `json:"enrollment_no" binding:"required"`
+// UpdateStudentRequest is the JSON body for PUT/PATCH /students/me
+type UpdateStudentRequest struct {
+	FullName     string `json:"full_name"`
+	Class        string `json:"class"`
+	EnrollmentNo string `json:"enrollment_no"`
+}
+
+// StudentProfile combines 'users' + 'students' for GET responses
+type StudentProfile struct {
+	UserID       string    `json:"user_id"`
+	StudentID    string    `json:"student_id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	FullName     string    `json:"full_name"`
+	Class        string    `json:"class"`
+	EnrollmentNo string    `json:"enrollment_no"`
+	CreatedAt    time.Time `json:"created_at"`
 }
