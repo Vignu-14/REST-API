@@ -103,3 +103,37 @@ func (r *executiveRepo) GetByUserID(ctx context.Context, userID string) (*models
 
 	return &profile, nil
 }
+
+// 3. Update modifies both 'users' (full_name) and 'executives' (department)
+func (r *executiveRepo) Update(ctx context.Context, userID string, req *models.UpdateExecutiveRequest) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	userUpdate := `
+		UPDATE users
+		SET full_name = $1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $2 AND role = 'executive'
+	`
+	cmdTag, err := tx.Exec(ctx, userUpdate, req.FullName, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update user table: %w", err)
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrExecutiveNotFound
+	}
+
+	execUpdate := `
+		UPDATE executives
+		SET department = $1
+		WHERE user_id = $2
+	`
+	_, err = tx.Exec(ctx, execUpdate, req.Department, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update executive table: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}
