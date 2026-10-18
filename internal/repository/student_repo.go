@@ -162,7 +162,29 @@ func (r *studentRepo) Delete(ctx context.Context, userID string) error {
 }
 
 func (r *studentRepo) GetByClass(ctx context.Context, class string) ([]models.StudentProfile, error){
-	
+	query := `
+		SELECT u.id, s.id, u.username, u.email, u.full_name, s.class, s.enrollment_no, s.created_at
+		FROM users u
+		INNER JOIN students s ON u.id = s.user_id
+		WHERE s.class = $1
+		ORDER BY u.full_name ASC
+	`
+
+	rows, err := r.db.Query(ctx, query, class)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch student by class: %w", err)
+	}
+	defer rows.Close()
+
+	var students []models.StudentProfile
+	for rows.Next() {
+		var u models.StudentProfile
+		if err = rows.Scan(&u.UserID, &u.StudentID, &u.Username, &u.Email, &u.FullName, &u.Class, &u.EnrollmentNo, u.CreatedAt); err != nil{
+			return nil, fmt.Errorf("failed to scan student row: %w", err)
+		}
+		students = append(students, u)
+	}
+	return students, nil
 }
 
 func (r *studentRepo) GetAll(ctx context.Context) ([]models.StudentProfile, error)
