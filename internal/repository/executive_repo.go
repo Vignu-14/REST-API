@@ -137,3 +137,16 @@ func (r *executiveRepo) Update(ctx context.Context, userID string, req *models.U
 
 	return tx.Commit(ctx)
 }
+
+// 4. Delete removes the user row; ON DELETE CASCADE deletes the executive row
+func (r *executiveRepo) Delete(ctx context.Context, userID string) error {
+	query := `DELETE FROM users WHERE id = $1 AND role = 'executive'`
+	cmdTag, err := r.db.Exec(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete executive: %w", err)
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrExecutiveNotFound
+	}
+	return nil
+}
