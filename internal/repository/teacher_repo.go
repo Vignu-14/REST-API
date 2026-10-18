@@ -85,7 +85,39 @@ func (t *teacherRepo) GetByUserID(ctx context.Context, userID string) (*models.T
 	return &profile, nil
 }
 
-func (t *teacherRepo) Update(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error
+func (t *teacherRepo) Update(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error {
+	tx, err := t.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	userUpdate := `
+		UPDATE users
+		SET full_name = $1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $2 AND role = 'teacher'
+	`
+	cmdTag, err := tx.Exec(ctx, userUpdate, req.FullName, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update user table: %w", err)
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrTeacherNotFound
+	}
+
+	teacherUpdate := `
+		UPDATE teachers
+		SET class = $1, subject = $2
+		WHERE user_id = $3
+	`
+	_, err = tx.Exec(ctx, teacherUpdate, req.Class, req.Subject, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update teacher table: %w", err)
+	}
+
+	return tx.Commit(ctx)
+
+}
 func (t *teacherRepo) Delete(ctx context.Context, userID string) error
 
 // Used by Executives
