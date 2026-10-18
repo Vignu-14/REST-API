@@ -1,5 +1,7 @@
 package config
 
+// true
+
 import (
 	"errors"
 	"os"

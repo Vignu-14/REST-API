@@ -1,5 +1,7 @@
 package token
 
+// true
+
 import (
 	"errors"
 	"fmt"

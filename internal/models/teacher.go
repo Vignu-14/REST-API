@@ -1,5 +1,7 @@
 package models
 
+// true
+
 import "time"
 
 // Teacher represents a row in the 'teachers' table

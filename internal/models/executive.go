@@ -1,5 +1,7 @@
 package models
 
+// true
+
 import "time"
 
 // Executive represents a row in the 'executives' table

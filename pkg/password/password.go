@@ -1,5 +1,7 @@
 package password
 
+// true
+
 import "golang.org/x/crypto/bcrypt"
 
 func Hash(password string) (string, error) {

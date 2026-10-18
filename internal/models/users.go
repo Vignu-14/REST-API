@@ -1,5 +1,7 @@
 package models
 
+// true
+
 import "time"
 
 type Role string
