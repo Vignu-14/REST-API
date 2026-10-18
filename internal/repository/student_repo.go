@@ -15,6 +15,6 @@ func NewRepoUser(pool *pgxpool.Pool) *RepoUser {
 	return &RepoUser{pool: pool}
 }
 
-func DbCreateStudent(ctx context.Context, username, email, fullname, password, class, enroll_no string) (int, error) {
+func (repo RepoUser) DbCreateStudent(ctx context.Context, username, email, fullname, password, class, enroll_no string) (int, error) {
 	return 0, errors.New("")
 }

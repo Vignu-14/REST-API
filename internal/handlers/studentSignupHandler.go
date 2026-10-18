@@ -28,7 +28,7 @@ func StudentSignupHandler(repo *repository.RepoUser) http.HandlerFunc {
 
 		var id int
 
-		id, err = repo.DbCreateStudent(r.Context(), user.Username, user.FullName, user.Password, user.Class, user.EnrollmentNo)
+		id, err = repo.DbCreateStudent(r.Context(), user.Username, user.Email, user.FullName, user.Password, user.Class, user.EnrollmentNo)
 
 	}
 }
