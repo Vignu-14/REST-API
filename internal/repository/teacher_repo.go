@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"rest-api/internal/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -66,7 +67,24 @@ func (t *teacherRepo) Create(ctx context.Context, user *models.User, teacher *mo
 }
 
 
-func (t *teacherRepo) GetByUserID(ctx context.Context, userID string) (*models.TeacherProfile, error)
+func (t *teacherRepo) GetByUserID(ctx context.Context, userID string) (*models.TeacherProfile, error){
+	query := `
+		SELECT u.id, t.id, u.username, u.email, u.full_name, t.class, t.subject, t.created_at
+		FROM users u
+		INNER JOIN teachers t ON u.id = t.user_id
+		WHERE u.id = $1 AND u.role = 'teacher'
+	`
+	var profile models.TeacherProfile
+	err := t.db.QueryRow(ctx, query, userID).Scan(&profile.UserID, &profile.TeacherID, &profile.Username, &profile.Email, &profile.FullName, &profile.Class, &profile.Subject, &profile.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows){
+			return nil, ErrStudentNotFound
+		}
+		return nil, fmt.Errorf("failed to get teacher by user_id: %w", err)
+	}
+	return &profile, nil
+}
+
 func (t *teacherRepo) Update(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error
 func (t *teacherRepo) Delete(ctx context.Context, userID string) error
 
