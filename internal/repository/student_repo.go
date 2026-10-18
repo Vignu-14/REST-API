@@ -106,11 +106,63 @@ func (r *studentRepo) GetByUserID(ctx context.Context, userID string) (*models.S
 	}
 	return &profile, nil
 }
+// Update modifies both 'users' (full_name) and 'students' (class, enrollment_no)
+func (r *studentRepo) Update(ctx context.Context, userID string, req *models.UpdateStudentRequest) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
 
-func (r *studentRepo) Update(ctx context.Context, userID string, req *models.UpdateStudentRequest) error 
+	userUpdate := `
+		UPDATE users
+		SET full_name = $1 , UPDATED_AT = CURRENT_TIMESTAMP
+		WHERE id = $2 AND role = 'student'
+	`
+	cmdTag, err := tx.Exec(ctx, userUpdate, req.FullName, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update user table: %w", err)
+	}
 
-func (r *studentRepo) Delete(ctx context.Context, userID string) error
+	if cmdTag.RowsAffected() == 0 {
+		return ErrStudentNotFound
+	}
 
-func (r *studentRepo) GetByClass(ctx context.Context, class string) ([]models.StudentProfile, error)
+	studentUpdate := `
+		UPDATE students
+		SET class = $1, enrollment_no = $2
+		WHERE user_id = $3
+	`
+	cmdTag, err = tx.Exec(ctx, studentUpdate, req.Class, req.EnrollmentNo, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update student table: %w", err)
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return ErrStudentNotFound
+	}
+	if err = tx.Commit(ctx); err != nil{
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// return tx.Commit(ctx)  // we can also return this because it's returns err 
+	return nil
+}
+
+func (r *studentRepo) Delete(ctx context.Context, userID string) error {
+	query := `DELETE FROM user WHERE id = $1 AND role = 'student'`
+	cmdTag, err := r.db.Exec(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete student: %w", err)
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrStudentNotFound
+	}
+	return nil
+}
+
+func (r *studentRepo) GetByClass(ctx context.Context, class string) ([]models.StudentProfile, error){
+	
+}
 
 func (r *studentRepo) GetAll(ctx context.Context) ([]models.StudentProfile, error)
