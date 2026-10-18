@@ -184,7 +184,29 @@ func (r *studentRepo) GetByClass(ctx context.Context, class string) ([]models.St
 		}
 		students = append(students, u)
 	}
-	return students, nil
+	return students, rows.Err()
 }
 
-func (r *studentRepo) GetAll(ctx context.Context) ([]models.StudentProfile, error)
+func (r *studentRepo) GetAll(ctx context.Context) ([]models.StudentProfile, error) {
+	query := `
+		SELECT u.id, s.id, u.username, u.email, u.full_name, s.class, s.enrollment_no, s.created_at
+		FROM users u
+		INNER JOIN students s ON u.id = s.user_id
+		ORDER BY s.class ASC, u.full_name ASC
+	`
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get student: %w", err)
+	}
+	defer rows.Close()
+
+	var students []models.StudentProfile
+	for rows.Next() {
+		var u models.StudentProfile
+		if err = rows.Scan(&u.UserID, &u.StudentID, &u.Username, &u.Email, &u.FullName, &u.Class, &u.EnrollmentNo, &u.CreatedAt); err != nil{
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		students = append(students, u)
+	}
+	return students, rows.Err()
+}
