@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"rest-api/internal/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -71,4 +73,33 @@ func (r *executiveRepo) Create(ctx context.Context, user *models.User, exec *mod
 	}
 
 	return nil
+}
+
+// 2. GetByUserID fetches an executive's joined profile
+func (r *executiveRepo) GetByUserID(ctx context.Context, userID string) (*models.ExecutiveProfile, error) {
+	query := `
+		SELECT u.id, e.id, u.username, u.email, u.full_name, e.department, e.created_at
+		FROM users u
+		INNER JOIN executives e ON u.id = e.user_id
+		WHERE u.id = $1 AND u.role = 'executive'
+	`
+
+	var profile models.ExecutiveProfile
+	err := r.db.QueryRow(ctx, query, userID).Scan(
+		&profile.UserID,
+		&profile.ExecutiveID,
+		&profile.Username,
+		&profile.Email,
+		&profile.FullName,
+		&profile.Department,
+		&profile.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrExecutiveNotFound
+		}
+		return nil, fmt.Errorf("failed to get executive by user_id: %w", err)
+	}
+
+	return &profile, nil
 }
