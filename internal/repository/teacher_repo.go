@@ -130,4 +130,30 @@ func (t *teacherRepo) Delete(ctx context.Context, userID string) error {
 }
 
 // Used by Executives
-func (t *teacherRepo) GetAll(ctx context.Context) ([]models.TeacherProfile, error)
+func (t *teacherRepo) GetAll(ctx context.Context) ([]models.TeacherProfile, error) {
+	query := `
+		SELECT u.id, t.id, u.username, u.email, u.full_name, t.class, t.subject, t.created_at
+		FROM users u
+		INNER JOIN teachers t ON u.id = t.user_id
+		ORDER BY t.class ASC, u.full_name ASC
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query all teachers: %w", err)
+	}
+	defer rows.Close()
+
+	var teachers []models.TeacherProfile
+	for rows.Next() {
+		var p models.TeacherProfile
+		if err := rows.Scan(
+			&p.UserID, &p.TeacherID, &p.Username, &p.Email,
+			&p.FullName, &p.Class, &p.Subject, &p.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan teacher row: %w", err)
+		}
+		teachers = append(teachers, p)
+	}
+	return teachers, rows.Err()
+}
