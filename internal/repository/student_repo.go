@@ -2,11 +2,15 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"rest-api/internal/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var ErrStudentNotFound = errors.New("student not found")
 
 type StudentRepository interface {
 	Create(ctx context.Context, user *models.User, student *models.Student) error
@@ -58,14 +62,14 @@ func (r *studentRepo) Create(ctx context.Context, user *models.User, student *mo
 			RETURNING(id, created_at)
 	`
 	err = r.db.QueryRow(ctx, studentQuery,
-			student.UserID,
-			student.Class,
-			student.EnrollmentNo,
+		student.UserID,
+		student.Class,
+		student.EnrollmentNo,
 	).Scan(&student.ID, &student.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("failed to insert student")
 	}
-	
+
 	err = tx.Commit(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to commit transaction")
@@ -74,7 +78,32 @@ func (r *studentRepo) Create(ctx context.Context, user *models.User, student *mo
 	return ctx.Err()
 }
 
-func (r *studentRepo) GetByUserID(ctx context.Context, userID string) (*models.StudentProfile, error)
+func (r *studentRepo) GetByUserID(ctx context.Context, userID string) (*models.StudentProfile, error) {
+	query := `
+		SELECT u.id, s.id, u.username, u.email, u.full_name, s.class, s.enrollment_no, s.created_at
+		FROM users u
+		INNER JOIN students s ON u.id = s.user_id
+		WHERE u.id = $1 AND u.role = 'student'
+	`
+	var profile models.StudentProfile
+	err := r.db.QueryRow(ctx, query, userID).Scan(
+		&profile.UserID,
+		&profile.StudentID,
+		&profile.Username,
+		&profile.Email,
+		&profile.FullName,
+		&profile.Class,
+		&profile.EnrollmentNo,
+		&profile.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows){
+			return nil, ErrStudentNotFound
+		}
+		return nil, fmt.Errorf("failed to student by user_id: %w", err)
+	}
+	return &profile, nil
+}
 
 func (r *studentRepo) Update(ctx context.Context, userID string, req *models.UpdateStudentRequest) error
 
