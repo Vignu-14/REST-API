@@ -150,3 +150,33 @@ func (r *executiveRepo) Delete(ctx context.Context, userID string) error {
 	}
 	return nil
 }
+
+// 5. GetAll returns all executives
+func (r *executiveRepo) GetAll(ctx context.Context) ([]models.ExecutiveProfile, error) {
+	query := `
+		SELECT u.id, e.id, u.username, u.email, u.full_name, e.department, e.created_at
+		FROM users u
+		INNER JOIN executives e ON u.id = e.user_id
+		ORDER BY e.department ASC, u.full_name ASC
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query all executives: %w", err)
+	}
+	defer rows.Close()
+
+	var executives []models.ExecutiveProfile
+	for rows.Next() {
+		var p models.ExecutiveProfile
+		if err := rows.Scan(
+			&p.UserID, &p.ExecutiveID, &p.Username, &p.Email,
+			&p.FullName, &p.Department, &p.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan executive row: %w", err)
+		}
+		executives = append(executives, p)
+	}
+
+	return executives, rows.Err()
+}
