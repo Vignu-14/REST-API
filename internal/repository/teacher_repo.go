@@ -114,11 +114,20 @@ func (t *teacherRepo) Update(ctx context.Context, userID string, req *models.Upd
 	if err != nil {
 		return fmt.Errorf("failed to update teacher table: %w", err)
 	}
-
 	return tx.Commit(ctx)
-
 }
-func (t *teacherRepo) Delete(ctx context.Context, userID string) error
+
+func (t *teacherRepo) Delete(ctx context.Context, userID string) error {
+	query := `DELETE FROM users WHERE id = $1 AND role = 'teacher'`
+	cmdTag, err := t.db.Exec(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete teacher: %w", err)
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrTeacherNotFound
+	}
+	return nil
+}
 
 // Used by Executives
 func (t *teacherRepo) GetAll(ctx context.Context) ([]models.TeacherProfile, error)
