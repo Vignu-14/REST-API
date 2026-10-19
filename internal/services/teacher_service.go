@@ -23,7 +23,7 @@ type teacherService struct {
 	studentRepo repository.StudentRepository
 }
 
-func NewTeacherService(teacherRepo repository.TeacherRepository, studentRepo repository.StudentRepository,) TeacherService {
+func NewTeacherService(teacherRepo repository.TeacherRepository, studentRepo repository.StudentRepository) TeacherService {
 	return &teacherService{
 		teacherRepo: teacherRepo,
 		studentRepo: studentRepo,
@@ -31,7 +31,7 @@ func NewTeacherService(teacherRepo repository.TeacherRepository, studentRepo rep
 }
 
 func (s *teacherService) Register(ctx context.Context, req *models.TeacherRegisterRequest) (*models.TeacherProfile, error) {
-	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.FullName) == "" || strings.TrimSpace(req.Password) == "" || strings.TrimSpace(req.Class) == "" || strings.TrimSpace(req.Subject) == ""{
+	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.FullName) == "" || strings.TrimSpace(req.Password) == "" || strings.TrimSpace(req.Class) == "" || strings.TrimSpace(req.Subject) == "" {
 		return nil, ErrInvalidInput
 	}
 	hashedPass, err := password.Hash(req.Password)
@@ -40,15 +40,15 @@ func (s *teacherService) Register(ctx context.Context, req *models.TeacherRegist
 	}
 
 	user := &models.User{
-		Username: strings.TrimSpace(req.Username),
-		Email: strings.TrimSpace(req.Email),
-		FullName: strings.TrimSpace(req.FullName),
+		Username:     strings.TrimSpace(req.Username),
+		Email:        strings.TrimSpace(req.Email),
+		FullName:     strings.TrimSpace(req.FullName),
 		PasswordHash: hashedPass,
-		Role: models.RoleTeacher,
+		Role:         models.RoleTeacher,
 	}
 
 	teacher := &models.Teacher{
-		Class: req.Class,
+		Class:   req.Class,
 		Subject: req.Subject,
 	}
 
@@ -58,13 +58,13 @@ func (s *teacherService) Register(ctx context.Context, req *models.TeacherRegist
 	}
 
 	profile := &models.TeacherProfile{
-		UserID: user.ID,
+		UserID:    user.ID,
 		TeacherID: teacher.ID,
-		Username: user.Username,
-		Email: user.Email,
-		FullName: user.FullName,
-		Class: teacher.Class,
-		Subject: teacher.Subject,
+		Username:  user.Username,
+		Email:     user.Email,
+		FullName:  user.FullName,
+		Class:     teacher.Class,
+		Subject:   teacher.Subject,
 		CreatedAt: teacher.CreatedAt,
 	}
 	return profile, nil
@@ -74,7 +74,14 @@ func (s *teacherService) GetProfile(ctx context.Context, userID string) (*models
 	return s.teacherRepo.GetByUserID(ctx, userID)
 }
 
-func (s *teacherService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error
+func (s *teacherService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error {
+	if strings.TrimSpace(req.FullName) == "" || strings.TrimSpace(req.Subject) == "" || strings.TrimSpace(req.Class) == "" {
+		return ErrInvalidInput
+	}
+	return s.teacherRepo.Update(ctx, userID, req)
+}
+
 func (s *teacherService) DeleteProfile(ctx context.Context, userID string) error
-	// RBAC Read-Only: Teacher can view students belonging to their own class
+
+// RBAC Read-Only: Teacher can view students belonging to their own class
 func (s *teacherService) GetMyClassStudents(ctx context.Context, teacherUserID string) ([]models.StudentProfile, error)
