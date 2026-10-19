@@ -95,4 +95,21 @@ func (h *StudentHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"message": "student profile updated successfully"})
 }
 
+func (h *StudentHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
 
+	if err := h.studentService.DeleteProfile(r.Context(), userID); err != nil {
+		if errors.Is(err, repository.ErrStudentNotFound) {
+			writeError(w, http.StatusNotFound, err.Error())
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "failed to delete profile")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": "student account deleted successfully"})
+}
