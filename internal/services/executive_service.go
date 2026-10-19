@@ -89,6 +89,14 @@ func (s *executiveService) DeleteProfile(ctx context.Context, userID string) err
 }
 
 // RBAC Read-Only: Executive can view all records across the school
-func (s *executiveService) GetAllStudents(ctx context.Context) ([]models.StudentProfile, error)
-func (s *executiveService) GetAllTeachers(ctx context.Context) ([]models.TeacherProfile, error)
-func (s *executiveService) GetAllExecutives(ctx context.Context) ([]models.ExecutiveProfile, error)
+func (s *executiveService) GetAllStudents(ctx context.Context) ([]models.StudentProfile, error){
+	return s.studentRepo.GetAll(ctx)
+}
+
+func (s *executiveService) GetAllTeachers(ctx context.Context) ([]models.TeacherProfile, error){ 
+	return s.teacherRepo.GetAll(ctx)
+}
+
+func (s *executiveService) GetAllExecutives(ctx context.Context) ([]models.ExecutiveProfile, error) {
+	return s.exceRepo.GetAll(ctx)
+}
