@@ -26,7 +26,9 @@ func NewStudentService(studentRepo repository.StudentRepository) StudentService 
 	}
 }
 
-func (s *studentService) Register(ctx context.Context, req *models.StudentRegisterRequest) (*models.StudentProfile, error)
+func (s *studentService) Register(ctx context.Context, req *models.StudentRegisterRequest) (*models.StudentProfile, error) {
+	
+}
 func (s *studentService) GetProfile(ctx context.Context, userID string) (*models.StudentProfile, error)
 func (s *studentService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateStudentRequest) error
 func (s *studentService) DeleteProfile(ctx context.Context, userID string) error
