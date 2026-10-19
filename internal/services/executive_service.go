@@ -62,13 +62,13 @@ func (s *executiveService) Register(ctx context.Context, req *models.ExecutiveRe
 	}
 
 	profile := &models.ExecutiveProfile{
-		UserID: user.ID,
+		UserID:      user.ID,
 		ExecutiveID: exec.ID,
-		Username: user.Username,
-		Email: user.Email,
-		FullName: user.FullName,
-		Department: exec.Department,
-		CreatedAt: exec.CreatedAt,
+		Username:    user.Username,
+		Email:       user.Email,
+		FullName:    user.FullName,
+		Department:  exec.Department,
+		CreatedAt:   exec.CreatedAt,
 	}
 	return profile, nil
 }
@@ -78,8 +78,12 @@ func (s *executiveService) GetProfile(ctx context.Context, userID string) (*mode
 }
 
 func (s *executiveService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateExecutiveRequest) error {
-	
+	if strings.TrimSpace(req.FullName) == "" || strings.TrimSpace(req.Department) == "" {
+		return ErrInvalidInput
+	}
+	return s.exceRepo.Update(ctx, userID, req)
 }
+
 func (s *executiveService) DeleteProfile(ctx context.Context, userID string) error
 
 // RBAC Read-Only: Executive can view all records across the school
