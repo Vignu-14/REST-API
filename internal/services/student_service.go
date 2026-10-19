@@ -73,8 +73,10 @@ func (s *studentService) Register(ctx context.Context, req *models.StudentRegist
 	return profile, nil
 }
 func (s *studentService) GetProfile(ctx context.Context, userID string) (*models.StudentProfile, error) {
-	return s.studentRepo.GetByUserID(ctx, userID)
-	
+	return s.studentRepo.GetByUserID(ctx, userID)	
 }
-func (s *studentService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateStudentRequest) error
+
+func (s *studentService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateStudentRequest) error {
+	return s.studentRepo.Update(ctx, userID, req)
+}
 func (s *studentService) DeleteProfile(ctx context.Context, userID string) error
