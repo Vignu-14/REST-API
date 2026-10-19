@@ -44,7 +44,7 @@ func (r *studentRepo) Create(ctx context.Context, user *models.User, student *mo
 	userQuery := `
 			INSERT INTO users(username, email, full_name, password_hash, role)
 			VALUES($1, $2, $3, $4, $5)
-			RETURNING(id, created_at, updated_at)
+			RETURNING id, created_at, updated_at
 	`
 	err = tx.QueryRow(ctx, userQuery,
 		user.Username,
@@ -61,9 +61,9 @@ func (r *studentRepo) Create(ctx context.Context, user *models.User, student *mo
 	studentQuery := `
 			INSERT INTO students(user_id, class, enrollment_no)
 			VAlUES($1, $2, $3)
-			RETURNING(id, created_at)
+			RETURNING id, created_at
 	`
-	err = r.db.QueryRow(ctx, studentQuery,
+	err = tx.QueryRow(ctx, studentQuery,
 		student.UserID,
 		student.Class,
 		student.EnrollmentNo,
@@ -150,7 +150,7 @@ func (r *studentRepo) Update(ctx context.Context, userID string, req *models.Upd
 }
 
 func (r *studentRepo) Delete(ctx context.Context, userID string) error {
-	query := `DELETE FROM user WHERE id = $1 AND role = 'student'`
+	query := `DELETE FROM users WHERE id = $1 AND role = 'student'`
 	cmdTag, err := r.db.Exec(ctx, query, userID)
 	if err != nil {
 		return fmt.Errorf("failed to delete student: %w", err)
@@ -179,7 +179,7 @@ func (r *studentRepo) GetByClass(ctx context.Context, class string) ([]models.St
 	var students []models.StudentProfile
 	for rows.Next() {
 		var u models.StudentProfile
-		if err = rows.Scan(&u.UserID, &u.StudentID, &u.Username, &u.Email, &u.FullName, &u.Class, &u.EnrollmentNo, u.CreatedAt); err != nil{
+		if err = rows.Scan(&u.UserID, &u.StudentID, &u.Username, &u.Email, &u.FullName, &u.Class, &u.EnrollmentNo, &u.CreatedAt); err != nil{
 			return nil, fmt.Errorf("failed to scan student row: %w", err)
 		}
 		students = append(students, u)

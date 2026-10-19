@@ -30,7 +30,7 @@ func (h *StudentHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req models.StudentRegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalied JSON body")
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
 		return
 	}
 	profile, err := h.studentService.Register(r.Context(), &req)

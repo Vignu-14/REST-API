@@ -33,7 +33,7 @@ func Authenticate(jwtSecret string, next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 1 || strings.ToLower(parts[0]) != "bearer" {
+		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
 			writeJSONError(w, http.StatusUnauthorized, "invalid authorization header format (expected 'Bearer <token>')")
 			return
 		}
@@ -45,7 +45,7 @@ func Authenticate(jwtSecret string, next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
-		ctx = context.WithValue(r.Context(), roleKey, models.Role(claims.Role))
+		ctx = context.WithValue(ctx, roleKey, models.Role(claims.Role))
 		next(w, r.WithContext(ctx))
 	}
 }

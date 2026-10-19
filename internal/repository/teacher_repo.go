@@ -52,7 +52,7 @@ func (t *teacherRepo) Create(ctx context.Context, user *models.User, teacher *mo
 	teacherQuery := `
 		INSERT INTO teachers(user_id, class, subject)
 		VALUES($1, $2, $3)
-		RETURNING(id, created_at)
+		RETURNING id, created_at
 	`
 	err = tx.QueryRow(ctx, teacherQuery, teacher.UserID, teacher.Class, teacher.Subject).Scan(&teacher.ID, &teacher.CreatedAt)
 	if err != nil {
@@ -78,7 +78,7 @@ func (t *teacherRepo) GetByUserID(ctx context.Context, userID string) (*models.T
 	err := t.db.QueryRow(ctx, query, userID).Scan(&profile.UserID, &profile.TeacherID, &profile.Username, &profile.Email, &profile.FullName, &profile.Class, &profile.Subject, &profile.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows){
-			return nil, ErrStudentNotFound
+			return nil, ErrTeacherNotFound
 		}
 		return nil, fmt.Errorf("failed to get teacher by user_id: %w", err)
 	}
