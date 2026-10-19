@@ -50,3 +50,30 @@ func Authenticate(jwtSecret string, next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func RequireRole(next http.HandlerFunc, allowedRoles ...models.Role) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userRole, ok := GetUserRole(r.Context())
+		if !ok{
+			writeJSONError(w, http.StatusUnauthorized, "unathorized: role not found in context")
+			return 
+		}
+
+		for _, allowed := range allowedRoles{
+			if userRole == allowed{
+				next(w, r)
+				return 
+			}
+		}
+		writeJSONError(w, http.StatusForbidden, "forbidden: insufficient permissions for your role")
+	}
+}
+
+func GetUserID(ctx context.Context) (string, bool) {
+	userID, ok := ctx.Value(userIDKey).(string)
+	return userID, ok
+}
+
+func GetUserRole(ctx context.Context) (models.Role, bool) {
+	role, ok := ctx.Value(roleKey).(models.Role)
+	return role, ok
+}
