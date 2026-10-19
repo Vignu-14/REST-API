@@ -45,6 +45,7 @@ func (h *StudentHandler) Register(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, profile)
 }
 
+// GET students/me (protected: RoleStudent)
 func (h *StudentHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserID(r.Context())
 	if !ok {
@@ -62,6 +63,36 @@ func (h *StudentHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
+}
+
+// PUT students/me	 (protected: RoleStudent)
+func (h *StudentHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req models.UpdateStudentRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
+	if err := h.studentService.UpdateProfile(r.Context(), userID, &req); err != nil {
+		if errors.Is(err, services.ErrInvalidInput) {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if errors.Is(err, repository.ErrStudentNotFound) {
+			writeError(w, http.StatusNotFound, err.Error())
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "failed to update profile")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"message": "student profile updated successfully"})
 }
 
 
