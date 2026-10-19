@@ -69,7 +69,11 @@ func (s *teacherService) Register(ctx context.Context, req *models.TeacherRegist
 	}
 	return profile, nil
 }
-func (s *teacherService) GetProfile(ctx context.Context, userID string) (*models.TeacherProfile, error)
+
+func (s *teacherService) GetProfile(ctx context.Context, userID string) (*models.TeacherProfile, error) {
+	return s.teacherRepo.GetByUserID(ctx, userID)
+}
+
 func (s *teacherService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateTeacherRequest) error
 func (s *teacherService) DeleteProfile(ctx context.Context, userID string) error
 	// RBAC Read-Only: Teacher can view students belonging to their own class
