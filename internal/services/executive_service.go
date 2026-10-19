@@ -73,8 +73,13 @@ func (s *executiveService) Register(ctx context.Context, req *models.ExecutiveRe
 	return profile, nil
 }
 
-func (s *executiveService) GetProfile(ctx context.Context, userID string) (*models.ExecutiveProfile, error)
-func (s *executiveService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateExecutiveRequest) error
+func (s *executiveService) GetProfile(ctx context.Context, userID string) (*models.ExecutiveProfile, error) {
+	return s.exceRepo.GetByUserID(ctx, userID)
+}
+
+func (s *executiveService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateExecutiveRequest) error {
+	
+}
 func (s *executiveService) DeleteProfile(ctx context.Context, userID string) error
 
 // RBAC Read-Only: Executive can view all records across the school
