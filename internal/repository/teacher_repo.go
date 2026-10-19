@@ -25,7 +25,7 @@ type teacherRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewTeacherRepo(db *pgxpool.Pool) TeacherRepository {
+func NewTeacherRepository(db *pgxpool.Pool) TeacherRepository {
 	return &teacherRepo{
 		db: db,
 	}

@@ -12,6 +12,7 @@ func NewRouter(
 	execHandler *handlers.ExecutiveHandler,
 	jwtSecret string,
 ) *http.ServeMux {
+	
 	mux := http.NewServeMux()
 
 	// Unified Login Route (Works for Student, Teacher, and Executive)
