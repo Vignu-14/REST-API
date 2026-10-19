@@ -86,4 +86,11 @@ func (s *teacherService) DeleteProfile(ctx context.Context, userID string) error
 }
 
 // RBAC Read-Only: Teacher can view students belonging to their own class
-func (s *teacherService) GetMyClassStudents(ctx context.Context, teacherUserID string) ([]models.StudentProfile, error)
+func (s *teacherService) GetMyClassStudents(ctx context.Context, teacherUserID string) ([]models.StudentProfile, error) {
+	teacher, err := s.teacherRepo.GetByUserID(ctx, teacherUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.studentRepo.GetByClass(ctx, teacher.Class)
+}
