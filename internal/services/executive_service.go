@@ -84,7 +84,9 @@ func (s *executiveService) UpdateProfile(ctx context.Context, userID string, req
 	return s.exceRepo.Update(ctx, userID, req)
 }
 
-func (s *executiveService) DeleteProfile(ctx context.Context, userID string) error
+func (s *executiveService) DeleteProfile(ctx context.Context, userID string) error {
+	return s.exceRepo.Delete(ctx, userID)
+}
 
 // RBAC Read-Only: Executive can view all records across the school
 func (s *executiveService) GetAllStudents(ctx context.Context) ([]models.StudentProfile, error)
