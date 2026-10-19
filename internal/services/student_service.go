@@ -77,6 +77,12 @@ func (s *studentService) GetProfile(ctx context.Context, userID string) (*models
 }
 
 func (s *studentService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateStudentRequest) error {
+	if strings.TrimSpace(req.FullName) == "" || strings.TrimSpace(req.Class) == "" {
+		return ErrInvalidInput
+	}
 	return s.studentRepo.Update(ctx, userID, req)
 }
-func (s *studentService) DeleteProfile(ctx context.Context, userID string) error
+
+func (s *studentService) DeleteProfile(ctx context.Context, userID string) error{
+	return s.studentRepo.Delete(ctx, userID)
+}
